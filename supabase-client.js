@@ -181,86 +181,121 @@ function mockDelete(table, id) {
 // AUTH FUNCTIONS
 // ============================================
 
-// Login function
+// supabase-client.js - Perbaiki fungsi login
+
+// LOGIN FUNCTION - VERSI PERBAIKAN
 async function loginUser(email, password, role) {
+    console.log('🔐 Attempting login:', email, role);
+    
     const client = getSupabase();
     if (!client) {
-        // Mock login
-        console.log('Mock login:', email, password, role);
-        const tables = {
-            siswa: 'siswa',
-            guru: 'guru', 
-            orangtua: 'orangtua'
-        };
-        const table = tables[role];
-        if (!table) return null;
-        
-        const users = mockData[table] || [];
-        const user = users.find(u => u.email === email && u.password === password);
-        if (user) {
-            return { ...user, role };
-        }
-        return null;
+        console.warn('⚠️ Supabase not available, using mock login');
+        return mockLogin(email, password, role);
     }
     
     try {
-        // Try to authenticate with Supabase Auth
+        // Step 1: Authenticate with Supabase Auth
         const { data: authData, error: authError } = await client.auth.signInWithPassword({
             email: email,
             password: password
         });
         
-        if (authError) throw authError;
+        if (authError) {
+            console.error('❌ Auth error:', authError);
+            return null;
+        }
         
-        // Get user profile from respective table
+        console.log('✅ Auth successful:', authData.user.id);
+        
+        // Step 2: Get user profile from respective table
         const table = {
             siswa: 'siswa',
             guru: 'guru',
             orangtua: 'orangtua'
         }[role];
         
-        if (!table) return null;
+        if (!table) {
+            console.error('❌ Invalid role:', role);
+            return null;
+        }
         
+        // Coba cari user berdasarkan email
         const { data: userData, error: userError } = await client
             .from(table)
             .select('*')
             .eq('email', email)
-            .single();
+            .maybeSingle(); // Gunakan maybeSingle() bukan single()
             
-        if (userError) throw userError;
+        if (userError) {
+            console.error('❌ Error fetching user data:', userError);
+            // Coba cari berdasarkan user_id
+            const { data: userByUid, error: uidError } = await client
+                .from(table)
+                .select('*')
+                .eq('user_id', authData.user.id)
+                .maybeSingle();
+                
+            if (uidError || !userByUid) {
+                console.error('❌ User not found in table:', table);
+                return null;
+            }
+            
+            return { ...userByUid, role };
+        }
+        
+        if (!userData) {
+            console.error('❌ User not found in table:', table);
+            return null;
+        }
         
         return { ...userData, role };
+        
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('❌ Login error:', error);
         return null;
     }
 }
 
-// Register function
+// MOCK LOGIN untuk development
+function mockLogin(email, password, role) {
+    console.log('📱 Mock login:', email, password, role);
+    const mockUsers = {
+        siswa: [
+            { nis: '001', nama: 'Andi Prasetyo', kelas: 'IX-A', email: 'andi@email.com', password: 'password123' },
+            { nis: '002', nama: 'Budi Santoso', kelas: 'IX-B', email: 'budi@email.com', password: 'password123' }
+        ],
+        guru: [
+            { nip: 'BK001', nama: 'Ibu Siti', email: 'guru@email.com', password: 'password123' }
+        ],
+        orangtua: [
+            { id_orangtua: 'ORTU001', nama: 'Bapak Ahmad', email: 'ortu@email.com', password: 'password123' }
+        ]
+    };
+    
+    const users = mockUsers[role] || [];
+    const user = users.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+        console.log('✅ Mock login successful:', user.nama);
+        return { ...user, role };
+    }
+    
+    console.error('❌ Mock login failed');
+    return null;
+}
+// supabase-client.js - Perbaiki fungsi register
+
 async function registerUser(data, role) {
+    console.log('📝 Attempting registration:', data.email, role);
+    
     const client = getSupabase();
     if (!client) {
-        // Mock register
-        console.log('Mock register:', data, role);
-        const table = {
-            siswa: 'siswa',
-            guru: 'guru',
-            orangtua: 'orangtua'
-        }[role];
-        
-        if (!table) return null;
-        
-        const newUser = {
-            ...data,
-            created_at: new Date().toISOString()
-        };
-        
-        mockData[table].push(newUser);
-        return newUser;
+        console.warn('⚠️ Supabase not available, using mock register');
+        return mockRegister(data, role);
     }
     
     try {
-        // Register with Supabase Auth
+        // Step 1: Register with Supabase Auth
         const { data: authData, error: authError } = await client.auth.signUp({
             email: data.email,
             password: data.password,
@@ -272,31 +307,71 @@ async function registerUser(data, role) {
             }
         });
         
-        if (authError) throw authError;
+        if (authError) {
+            console.error('❌ Auth registration error:', authError);
+            return null;
+        }
         
-        // Save user profile
+        if (!authData.user) {
+            console.error('❌ No user returned from auth');
+            return null;
+        }
+        
+        console.log('✅ Auth registration successful:', authData.user.id);
+        
+        // Step 2: Save user profile
         const table = {
             siswa: 'siswa',
             guru: 'guru',
             orangtua: 'orangtua'
         }[role];
         
-        if (!table) return null;
+        if (!table) {
+            console.error('❌ Invalid role:', role);
+            return null;
+        }
+        
+        // Prepare data for insert
+        const insertData = {
+            ...data,
+            user_id: authData.user.id,
+            created_at: new Date().toISOString()
+        };
+        
+        // Remove password from insert (we already have it in auth)
+        delete insertData.password;
+        
+        console.log('📤 Inserting user data:', insertData);
         
         const { data: userData, error: userError } = await client
             .from(table)
-            .insert([{
-                ...data,
-                user_id: authData.user.id,
-                created_at: new Date().toISOString()
-            }])
-            .select();
+            .insert([insertData])
+            .select()
+            .maybeSingle();
             
-        if (userError) throw userError;
+        if (userError) {
+            console.error('❌ Error inserting user data:', userError);
+            // If insert fails, try update
+            const { data: updateData, error: updateError } = await client
+                .from(table)
+                .update(insertData)
+                .eq('user_id', authData.user.id)
+                .select()
+                .maybeSingle();
+                
+            if (updateError) {
+                console.error('❌ Error updating user data:', updateError);
+                return null;
+            }
+            
+            return updateData;
+        }
         
-        return userData[0];
+        console.log('✅ Registration complete:', userData);
+        return userData;
+        
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error('❌ Registration error:', error);
         return null;
     }
 }

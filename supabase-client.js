@@ -1,33 +1,23 @@
 // supabase-client.js
-// ============================================
-// SI-KONCI - Supabase Client
-// ============================================
-
-// Jika menggunakan CDN
-// <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+// PASTIKAN INI BENAR:
 const SUPABASE_URL = 'https://huqswtchblugmpjbrkai.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_oeC_VDEatcw3J6J-xhDtzQ_x6bVaC_k';
+const SUPABASE_ANON_KEY = 'sb_publishable_oeC_VDEatcw3J6J-xhDtzQ_x6bVaC_k'; // KEY ANDA
 
-// Inisialisasi Supabase client
-let supabaseClient = null;
-
+// PASTIKAN INI JUGA ADA:
 function initSupabase() {
     if (typeof supabase === 'undefined') {
         console.warn('Supabase library not loaded. Using mock mode.');
         return null;
     }
     
-    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    return supabaseClient;
-}
-
-// Fungsi untuk mendapatkan client
-function getSupabase() {
-    if (!supabaseClient) {
-        return initSupabase();
+    try {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Supabase connected successfully!');
+        return supabaseClient;
+    } catch (error) {
+        console.error('❌ Failed to connect to Supabase:', error);
+        return null;
     }
-    return supabaseClient;
 }
 
 // ============================================

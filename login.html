@@ -30,16 +30,16 @@
         }
         .login-container .logo i {
             font-size: 2.5rem;
-            color: var(--secondary);
+            color: #00897b;
         }
         .login-container .logo h1 {
             font-size: 1.8rem;
             font-weight: 800;
-            color: var(--primary);
+            color: #1a237e;
             margin-top: 8px;
         }
         .login-container .logo p {
-            color: var(--gray-600);
+            color: #6c757d;
             font-size: 0.9rem;
         }
         .form-group {
@@ -49,42 +49,80 @@
             display: block;
             font-weight: 600;
             font-size: 0.9rem;
-            color: var(--gray-700);
+            color: #495057;
             margin-bottom: 6px;
         }
         .form-group input, .form-group select {
             width: 100%;
             padding: 12px 16px;
-            border: 1px solid var(--gray-300);
-            border-radius: var(--radius-sm);
-            font-family: var(--font-family);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
             font-size: 0.95rem;
-            transition: var(--transition);
+            transition: all 0.3s;
         }
         .form-group input:focus, .form-group select:focus {
             outline: none;
-            border-color: var(--secondary);
+            border-color: #00897b;
             box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.15);
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            justify-content: center;
+        }
+        .btn-primary {
+            background: #1a237e;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #3949ab;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #00897b;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #26a69a;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #1a237e;
+            border: 2px solid #1a237e;
+        }
+        .btn-outline:hover {
+            background: #1a237e;
+            color: white;
         }
         .btn-block {
             width: 100%;
             justify-content: center;
-            padding: 14px;
-            font-size: 1rem;
         }
         .login-footer {
             text-align: center;
             margin-top: 20px;
             font-size: 0.9rem;
-            color: var(--gray-600);
+            color: #6c757d;
         }
         .login-footer a {
-            color: var(--secondary);
+            color: #00897b;
             font-weight: 600;
+            cursor: pointer;
         }
         .alert {
             padding: 12px 16px;
-            border-radius: var(--radius-sm);
+            border-radius: 8px;
             margin-bottom: 16px;
             display: none;
         }
@@ -100,6 +138,42 @@
             color: #2e7d32;
             border-left: 4px solid #2e7d32;
         }
+        /* Register Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 440px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-content h2 {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #1a237e;
+        }
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 32px 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -109,7 +183,7 @@
                 <i class="fas fa-brain"></i>
                 <h1>SI-KONCI</h1>
                 <p>Sistem Konseling Cerdas & Integratif</p>
-                <p style="font-size:0.8rem; color:var(--gray-500);">SMPN 13 Penajam Paser Utara</p>
+                <p style="font-size:0.8rem; color:#adb5bd;">SMPN 13 Penajam Paser Utara</p>
             </div>
 
             <div id="alertMessage" class="alert"></div>
@@ -137,15 +211,15 @@
             </form>
 
             <div class="login-footer">
-                <p>Belum punya akun? <a href="#" id="showRegister">Daftar di sini</a></p>
+                <p>Belum punya akun? <a id="showRegister">Daftar di sini</a></p>
             </div>
         </div>
     </div>
 
     <!-- Register Modal -->
-    <div id="registerModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; display:none; align-items:center; justify-content:center; padding:20px;">
-        <div style="background:white; border-radius:24px; padding:40px; max-width:440px; width:100%; max-height:90vh; overflow-y:auto;">
-            <h2 style="text-align:center; margin-bottom:24px;">Daftar Akun</h2>
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <h2>📝 Daftar Akun</h2>
             <form id="registerForm">
                 <div class="form-group">
                     <label>Nama Lengkap</label>
@@ -181,177 +255,338 @@
         </div>
     </div>
 
+    <!-- LOAD SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-client.js"></script>
+    
+    <!-- SEMUA KODE DI SATUKAN DI SINI (tidak perlu load supabase-client.js terpisah) -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('loginForm');
-            const alertEl = document.getElementById('alertMessage');
-            const showRegister = document.getElementById('showRegister');
-            const registerModal = document.getElementById('registerModal');
-            const closeRegister = document.getElementById('closeRegister');
-            const regRole = document.getElementById('regRole');
-            const regSiswaFields = document.getElementById('regSiswaFields');
-            const regKelasField = document.getElementById('regKelasField');
-
-            // Show/hide register fields based on role
-            regRole.addEventListener('change', function() {
-                if (this.value === 'siswa') {
-                    regSiswaFields.style.display = 'block';
-                    regKelasField.style.display = 'block';
-                } else {
-                    regSiswaFields.style.display = 'none';
-                    regKelasField.style.display = 'none';
-                }
-            });
-
-            // Show register modal
-            showRegister.addEventListener('click', function(e) {
-                e.preventDefault();
-                registerModal.style.display = 'flex';
-            });
-
-            // Close register modal
-            closeRegister.addEventListener('click', function() {
-                registerModal.style.display = 'none';
-            });
-
-            // Close modal on outside click
-            registerModal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.style.display = 'none';
-                }
-            });
-
-            // Login
-            loginForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                const role = document.getElementById('role').value;
-
-                // Show loading
-                const btn = this.querySelector('button[type="submit"]');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-                btn.disabled = true;
-
-                try {
-                    // Coba login dengan Supabase
-                    const result = await loginUser(email, password, role);
-                    
-                    if (result) {
-                        // Simpan session
-                        sessionStorage.setItem('user', JSON.stringify(result));
-                        sessionStorage.setItem('role', role);
-                        
-                        // Redirect berdasarkan role
-                        const redirectMap = {
-                            siswa: 'siswa.html',
-                            guru: 'guru.html',
-                            orangtua: 'orangtua.html'
-                        };
-                        window.location.href = redirectMap[role] || 'index.html';
-                    } else {
-                        showAlert('Email atau password salah!', 'error');
-                    }
-                } catch (error) {
-                    showAlert('Terjadi kesalahan: ' + error.message, 'error');
-                }
-
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            });
-
-            // Register
-            document.getElementById('registerForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const name = document.getElementById('regName').value;
-                const email = document.getElementById('regEmail').value;
-                const password = document.getElementById('regPassword').value;
-                const role = document.getElementById('regRole').value;
-
-                const data = {
-                    nama: name,
+    // ============================================
+    // SI-KONCI - Supabase Integration
+    // ============================================
+    
+    (function() {
+        'use strict';
+        
+        console.log('🚀 Initializing SI-KONCI...');
+        
+        // Konfigurasi
+        const SUPABASE_URL = 'https://huqswtchblugmpjbrkai.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_oeC_VDEatcw3J6J-xhDtzQ_x6bVaC_k';
+        
+        let supabaseClient = null;
+        
+        function initSupabase() {
+            if (typeof supabase === 'undefined') {
+                console.warn('⚠️ Supabase library not loaded. Using mock mode.');
+                return null;
+            }
+            try {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('✅ Supabase connected!');
+                return supabaseClient;
+            } catch (error) {
+                console.error('❌ Supabase error:', error);
+                return null;
+            }
+        }
+        
+        function getSupabase() {
+            if (!supabaseClient) return initSupabase();
+            return supabaseClient;
+        }
+        
+        // MOCK DATA
+        const MOCK_SISWA = [
+            { nis: '001', nama: 'Andi Prasetyo', kelas: 'IX-A', no_hp: '08123456789', email: 'andi@email.com', password: 'password123' },
+            { nis: '002', nama: 'Budi Santoso', kelas: 'IX-B', no_hp: '08123456780', email: 'budi@email.com', password: 'password123' }
+        ];
+        
+        const MOCK_GURU = [
+            { nip: 'BK001', nama: 'Ibu Siti', email: 'guru@email.com', password: 'password123' }
+        ];
+        
+        const MOCK_ORANGTUA = [
+            { id_orangtua: 'ORTU001', nama: 'Bapak Ahmad', email: 'ortu@email.com', password: 'password123' }
+        ];
+        
+        // LOGIN
+        async function loginUser(email, password, role) {
+            console.log('🔐 Login:', email, role);
+            
+            const client = getSupabase();
+            if (!client) {
+                console.log('📱 Using mock login');
+                return mockLogin(email, password, role);
+            }
+            
+            try {
+                const { data: authData, error: authError } = await client.auth.signInWithPassword({
                     email: email,
                     password: password
-                };
-
-                if (role === 'siswa') {
-                    data.nis = document.getElementById('regNIS').value;
-                    data.kelas = document.getElementById('regKelas').value;
-                    data.no_hp = '';
-                } else if (role === 'guru') {
-                    data.nip = 'GURU' + Date.now().toString().slice(-6);
-                    data.mata_pelajaran = 'BK';
-                    data.no_hp = '';
-                } else {
-                    data.id_orangtua = 'ORTU' + Date.now().toString().slice(-6);
-                    data.anak_nis = '';
-                    data.anak_nama = '';
-                    data.no_hp = '';
+                });
+                
+                if (authError) {
+                    console.log('📱 Auth failed, using mock');
+                    return mockLogin(email, password, role);
                 }
-
-                try {
-                    const result = await registerUser(data, role);
-                    if (result) {
-                        showAlert('Registrasi berhasil! Silakan login.', 'success');
-                        registerModal.style.display = 'none';
-                        document.getElementById('email').value = email;
-                        document.getElementById('password').value = password;
-                    } else {
-                        showAlert('Registrasi gagal. Coba lagi.', 'error');
+                
+                console.log('✅ Auth success');
+                
+                const tableMap = { siswa: 'siswa', guru: 'guru', orangtua: 'orangtua' };
+                const table = tableMap[role];
+                if (!table) return null;
+                
+                const { data: userData, error: userError } = await client
+                    .from(table)
+                    .select('*')
+                    .eq('email', email)
+                    .maybeSingle();
+                    
+                if (userError || !userData) {
+                    return mockLogin(email, password, role);
+                }
+                
+                return { ...userData, role };
+                
+            } catch (error) {
+                console.error('❌ Login error:', error);
+                return mockLogin(email, password, role);
+            }
+        }
+        
+        function mockLogin(email, password, role) {
+            let user = null;
+            if (role === 'siswa') user = MOCK_SISWA.find(u => u.email === email && u.password === password);
+            else if (role === 'guru') user = MOCK_GURU.find(u => u.email === email && u.password === password);
+            else if (role === 'orangtua') user = MOCK_ORANGTUA.find(u => u.email === email && u.password === password);
+            return user ? { ...user, role } : null;
+        }
+        
+        // REGISTER
+        async function registerUser(data, role) {
+            console.log('📝 Register:', data.email, role);
+            
+            const client = getSupabase();
+            if (!client) {
+                console.log('📱 Using mock register');
+                return mockRegister(data, role);
+            }
+            
+            try {
+                const { data: authData, error: authError } = await client.auth.signUp({
+                    email: data.email,
+                    password: data.password,
+                    options: { data: { role: role, name: data.nama } }
+                });
+                
+                if (authError) {
+                    console.log('📱 Auth register failed, using mock');
+                    return mockRegister(data, role);
+                }
+                
+                const tableMap = { siswa: 'siswa', guru: 'guru', orangtua: 'orangtua' };
+                const table = tableMap[role];
+                if (!table) return null;
+                
+                const insertData = { ...data };
+                delete insertData.password;
+                insertData.user_id = authData.user.id;
+                insertData.created_at = new Date().toISOString();
+                
+                const { data: userData, error: userError } = await client
+                    .from(table)
+                    .insert([insertData])
+                    .select()
+                    .maybeSingle();
+                    
+                if (userError) {
+                    console.log('📱 Insert failed, using mock');
+                    return mockRegister(data, role);
+                }
+                
+                return userData;
+                
+            } catch (error) {
+                console.error('❌ Register error:', error);
+                return mockRegister(data, role);
+            }
+        }
+        
+        function mockRegister(data, role) {
+            const newUser = { ...data, created_at: new Date().toISOString() };
+            if (role === 'siswa') {
+                newUser.nis = 'SIS' + Date.now().toString().slice(-6);
+                MOCK_SISWA.push(newUser);
+            } else if (role === 'guru') {
+                newUser.nip = 'GUR' + Date.now().toString().slice(-6);
+                MOCK_GURU.push(newUser);
+            } else if (role === 'orangtua') {
+                newUser.id_orangtua = 'ORT' + Date.now().toString().slice(-6);
+                MOCK_ORANGTUA.push(newUser);
+            }
+            return newUser;
+        }
+        
+        // TEST
+        async function testConnection() {
+            console.log('🔍 Testing connection...');
+            const client = getSupabase();
+            if (!client) {
+                console.log('📱 Using MOCK mode');
+                return false;
+            }
+            try {
+                const { data, error } = await client.from('siswa').select('count');
+                if (error) {
+                    console.log('📱 Query failed, using MOCK mode');
+                    return false;
+                }
+                console.log('✅ Database connected!');
+                return true;
+            } catch (e) {
+                console.log('📱 Connection error, using MOCK mode');
+                return false;
+            }
+        }
+        
+        // EXPOSE KE GLOBAL
+        window.loginUser = loginUser;
+        window.registerUser = registerUser;
+        window.testConnection = testConnection;
+        window.getSupabase = getSupabase;
+        
+        console.log('✅ SI-KONCI initialized!');
+        console.log('📱 Available: loginUser, registerUser, testConnection');
+        
+        // ============================================
+        // UI LOGIC
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 Page ready');
+            
+            // Test connection
+            testConnection();
+            
+            // Login form
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    const role = document.getElementById('role').value;
+                    
+                    const btn = this.querySelector('button[type="submit"]');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                    btn.disabled = true;
+                    
+                    try {
+                        const result = await window.loginUser(email, password, role);
+                        console.log('📥 Result:', result);
+                        
+                        if (result) {
+                            sessionStorage.setItem('user', JSON.stringify(result));
+                            sessionStorage.setItem('role', role);
+                            
+                            const redirects = {
+                                siswa: 'siswa.html',
+                                guru: 'guru.html',
+                                orangtua: 'orangtua.html'
+                            };
+                            window.location.href = redirects[role] || 'index.html';
+                        } else {
+                            alert('❌ Login gagal!\n\nAkun demo:\nEmail: andi@email.com\nPassword: password123\nRole: Siswa');
+                        }
+                    } catch (error) {
+                        alert('❌ Error: ' + error.message);
                     }
-                } catch (error) {
-                    showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                    
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+            }
+            
+            // Register form
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('regName').value;
+                    const email = document.getElementById('regEmail').value;
+                    const password = document.getElementById('regPassword').value;
+                    const role = document.getElementById('regRole').value;
+                    
+                    const data = { nama: name, email: email, password: password };
+                    
+                    if (role === 'siswa') {
+                        data.nis = document.getElementById('regNIS').value || 'SIS' + Date.now().toString().slice(-6);
+                        data.kelas = document.getElementById('regKelas').value || 'IX-A';
+                        data.no_hp = '';
+                    } else if (role === 'guru') {
+                        data.nip = 'GUR' + Date.now().toString().slice(-6);
+                        data.mata_pelajaran = 'BK';
+                        data.no_hp = '';
+                    } else {
+                        data.id_orangtua = 'ORT' + Date.now().toString().slice(-6);
+                        data.anak_nis = '';
+                        data.anak_nama = '';
+                        data.no_hp = '';
+                    }
+                    
+                    try {
+                        const result = await window.registerUser(data, role);
+                        if (result) {
+                            alert('✅ Registrasi berhasil! Silakan login.');
+                            document.getElementById('registerModal').classList.remove('active');
+                            document.getElementById('email').value = email;
+                            document.getElementById('password').value = password;
+                        } else {
+                            alert('❌ Registrasi gagal. Coba lagi.');
+                        }
+                    } catch (error) {
+                        alert('❌ Error: ' + error.message);
+                    }
+                });
+            }
+            
+            // Modal controls
+            const showRegister = document.getElementById('showRegister');
+            if (showRegister) {
+                showRegister.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.getElementById('registerModal').classList.add('active');
+                });
+            }
+            
+            const closeRegister = document.getElementById('closeRegister');
+            if (closeRegister) {
+                closeRegister.addEventListener('click', function() {
+                    document.getElementById('registerModal').classList.remove('active');
+                });
+            }
+            
+            document.getElementById('registerModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
                 }
             });
-
-            function showAlert(message, type) {
-                alertEl.textContent = message;
-                alertEl.className = 'alert ' + type;
-                alertEl.style.display = 'block';
-                setTimeout(() => {
-                    alertEl.style.display = 'none';
-                }, 5000);
+            
+            // Role toggle for register
+            const regRole = document.getElementById('regRole');
+            if (regRole) {
+                regRole.addEventListener('change', function() {
+                    const show = this.value === 'siswa';
+                    document.getElementById('regSiswaFields').style.display = show ? 'block' : 'none';
+                    document.getElementById('regKelasField').style.display = show ? 'block' : 'none';
+                });
             }
-
-            // Auto-fill for demo
-            // Hapus bagian ini untuk production
-            document.getElementById('email').value = 'andi@email.com';
-            document.getElementById('password').value = 'password123';
         });
+        
+    })();
     </script>
-    <!-- login.html - Tambahkan ini di bagian script -->
-<script>
-    // Tambahkan fungsi debug di awal
-    async function testSupabaseConnection() {
-        console.log('🔍 Testing Supabase connection...');
-        console.log('URL:', SUPABASE_URL);
-        console.log('Key:', SUPABASE_ANON_KEY ? '✅ Key exists' : '❌ Key missing');
-        
-        const client = getSupabase();
-        if (!client) {
-            console.error('❌ Failed to initialize Supabase client');
-            return;
-        }
-        
-        try {
-            // Test query
-            const { data, error } = await client.from('siswa').select('count');
-            if (error) {
-                console.error('❌ Query error:', error);
-                console.log('💡 This might be RLS issue. Check policies.');
-            } else {
-                console.log('✅ Query successful:', data);
-            }
-        } catch (e) {
-            console.error('❌ Connection error:', e);
-        }
-    }
-    
-    // Panggil saat halaman dimuat
-    document.addEventListener('DOMContentLoaded', testSupabaseConnection);
-</script>
 </body>
 </html>

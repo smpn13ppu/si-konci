@@ -322,5 +322,36 @@
             document.getElementById('password').value = 'password123';
         });
     </script>
+    <!-- login.html - Tambahkan ini di bagian script -->
+<script>
+    // Tambahkan fungsi debug di awal
+    async function testSupabaseConnection() {
+        console.log('🔍 Testing Supabase connection...');
+        console.log('URL:', SUPABASE_URL);
+        console.log('Key:', SUPABASE_ANON_KEY ? '✅ Key exists' : '❌ Key missing');
+        
+        const client = getSupabase();
+        if (!client) {
+            console.error('❌ Failed to initialize Supabase client');
+            return;
+        }
+        
+        try {
+            // Test query
+            const { data, error } = await client.from('siswa').select('count');
+            if (error) {
+                console.error('❌ Query error:', error);
+                console.log('💡 This might be RLS issue. Check policies.');
+            } else {
+                console.log('✅ Query successful:', data);
+            }
+        } catch (e) {
+            console.error('❌ Connection error:', e);
+        }
+    }
+    
+    // Panggil saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', testSupabaseConnection);
+</script>
 </body>
 </html>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SI-KONCI - Portal Siswa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        /* Additional styles for portal pages */
+        .portal-hero {
+            padding: 120px 0 60px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #f5f7ff 100%);
+            text-align: center;
+        }
+
+        .portal-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .portal-hero p {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+        }
+
+        .portal-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid rgba(0,0,0,0.04);
+            margin-bottom: 24px;
+        }
+
+        .portal-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .portal-card .card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .portal-card .card-header i {
+            font-size: 1.8rem;
+            color: var(--secondary);
+        }
+
+        .portal-card .card-header h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin: 0;
+        }
+
+        .portal-card .card-header .badge {
+            margin-left: auto;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 50px;
+            background: var(--secondary);
+            color: var(--white);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-family);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background: var(--white);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.15);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            padding: 40px 0 80px;
+        }
+
+        .chat-box {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin-bottom: 16px;
+            background: var(--gray-50);
+        }
+
+        .chat-msg {
+            margin-bottom: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            max-width: 80%;
+        }
+
+        .chat-msg.sent {
+            background: var(--primary);
+            color: var(--white);
+            margin-left: auto;
+        }
+
+        .chat-msg.received {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+        }
+
+        .chat-msg .time {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .chat-msg.sent .time {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .booking-list {
+            margin-top: 12px;
+        }
+
+        .booking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--gray-50);
+            border-radius: var(--radius-sm);
+            margin-bottom: 8px;
+        }
+
+        .booking-item .status {
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status.pending { background: #fff3e0; color: #e65100; }
+        .status.confirmed { background: #e8f5e9; color: #2e7d32; }
+        .status.done { background: #e3f2fd; color: #1565c0; }
+        .status.cancelled { background: #fce4ec; color: #c62828; }
+
+        .mode-toggle {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .mode-toggle .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .mode-toggle .btn.active-mode {
+            background: var(--secondary);
+            color: var(--white);
+            border-color: var(--secondary);
+        }
+
+        @media (max-width: 768px) {
+            .portal-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .portal-hero h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain nav-logo"></i>
+                <span class="brand-text">SI-KONCI</span>
+                <span class="brand-sub">Siswa</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> Beranda</a></li>
+                <li><a href="#chat" class="nav-link active">Pojok Curhat</a></li>
+                <li><a href="#reservasi" class="nav-link">Reservasi</a></li>
+                <li><a href="#riwayat" class="nav-link">Riwayat</a></li>
+                <li><a href="index.html" class="btn-nav btn-outline"><i class="fas fa-sign-out-alt"></i> Keluar</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="portal-hero">
+        <div class="container">
+            <h1><i class="fas fa-user-graduate" style="color: var(--secondary);"></i> Selamat Datang, Siswa!</h1>
+            <p>Gunakan layanan konseling dengan aman dan nyaman. Pilih fitur di bawah ini.</p>
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <section class="portal">
+        <div class="container portal-grid">
+            <!-- LEFT COLUMN -->
+            <div>
+                <!-- POJOK CURHAT -->
+                <div class="portal-card" id="chat">
+                    <div class="card-header">
+                        <i class="fas fa-comment-dots"></i>
+                        <h3>Pojok Curhat</h3>
+                        <span class="badge">Private & Aman</span>
+                    </div>
+                    <div class="mode-toggle">
+                        <button class="btn btn-outline active-mode" id="modeNormal">
+                            <i class="fas fa-user"></i> Mode Normal
+                        </button>
+                        <button class="btn btn-outline" id="modeAnon">
+                            <i class="fas fa-user-secret"></i> Mode Anonim
+                        </button>
+                    </div>
+                    <div class="chat-box" id="chatBox">
+                        <div class="chat-msg received">
+                            <strong>Guru BK:</strong> Halo! Ada yang bisa saya bantu? 😊
+                            <span class="time">10:30</span>
+                        </div>
+                        <div class="chat-msg sent">
+                            <strong>Anda:</strong> Saya ingin curhat tentang...
+                            <span class="time">10:32</span>
+                        </div>
+                    </div>
+                    <div class="form-group" style="display:flex; gap:12px;">
+                        <input type="text" id="chatInput" placeholder="Ketik pesan..." style="flex:1;" />
+                        <button class="btn btn-primary" id="sendChat"><i class="fas fa-paper-plane"></i> Kirim</button>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--gray-500); margin-top:8px;">
+                        <i class="fas fa-lock"></i> Pesan terenkripsi end-to-end. Mode anonim menyembunyikan identitas Anda.
+                    </p>
+                </div>
+
+                <!-- RESERVASI -->
+                <div class="portal-card" id="reservasi">
+                    <div class="card-header">
+                        <i class="fas fa-calendar-plus"></i>
+                        <h3>Reservasi Jadwal Konseling</h3>
+                        <span class="badge">Tatap Muka</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tanggal</label>
+                            <input type="date" id="bookingDate" />
+                        </div>
+                        <div class="form-group">
+                            <label>Jam</label>
+                            <select id="bookingTime">
+                                <option value="">Pilih Jam</option>
+                                <option value="08:00">08:00 - 08:45</option>
+                                <option value="09:00">09:00 - 09:45</option>
+                                <option value="10:00">10:00 - 10:45</option>
+                                <option value="11:00">11:00 - 11:45</option>
+                                <option value="13:00">13:00 - 13:45</option>
+                                <option value="14:00">14:00 - 14:45</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Topik Konseling</label>
+                        <select id="bookingTopic">
+                            <option value="">Pilih Topik</option>
+                            <option value="Akademik">Masalah Akademik</option>
+                            <option value="Pertemanan">Masalah Pertemanan</option>
+                            <option value="Keluarga">Masalah Keluarga</option>
+                            <option value="Stres">Stres / Kecemasan</option>
+                            <option value="Bullying">Perundungan (Bullying)</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Catatan Tambahan</label>
+                        <textarea id="bookingNote" placeholder="Ceritakan secara singkat..." rows="2"></textarea>
+                    </div>
+                    <button class="btn btn-secondary btn-block" id="btnReservasi">
+                        <i class="fas fa-check-circle"></i> Ajukan Reservasi
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div>
+                <!-- RIWAYAT -->
+                <div class="portal-card" id="riwayat">
+                    <div class="card-header">
+                        <i class="fas fa-history"></i>
+                        <h3>Riwayat Konseling</h3>
+                    </div>
+                    <div class="booking-list">
+                        <div class="booking-item">
+                            <div>
+                                <strong>Konseling Akademik</strong>
+                                <div style="font-size:0.85rem; color:var(--gray-600);">15 Juni 2026, 10:00</div>
+                            </div>
+                            <span class="status done">Selesai</span>
+                        </div>
+                        <div class="booking-item">
+                            <div>
+                                <strong>Curhat Pribadi</strong>
+                                <div style="font-size:0.85rem; color:var(--gray-600);">20 Juni 2026, 14:00</div>
+                            </div>
+                            <span class="status confirmed">Dikonfirmasi</span>
+                        </div>
+                        <div class="booking-item">
+                            <div>
+                                <strong>Konseling Keluarga</strong>
+                                <div style="font-size:0.85rem; color:var(--gray-600);">25 Juni 2026, 09:00</div>
+                            </div>
+                            <span class="status pending">Menunggu</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline btn-block" style="margin-top:8px;">
+                        <i class="fas fa-chevron-down"></i> Lihat Semua
+                    </button>
+                </div>
+
+                <!-- INFO -->
+                <div class="portal-card">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle"></i>
+                        <h3>Info Penting</h3>
+                    </div>
+                    <ul style="list-style:none; padding:0;">
+                        <li style="padding:8px 0; border-bottom:1px solid var(--gray-100); display:flex; gap:12px;">
+                            <i class="fas fa-shield-alt" style="color:var(--secondary);"></i>
+                            <span style="font-size:0.9rem;">Semua percakapan bersifat rahasia</span>
+                        </li>
+                        <li style="padding:8px 0; border-bottom:1px solid var(--gray-100); display:flex; gap:12px;">
+                            <i class="fas fa-clock" style="color:var(--secondary);"></i>
+                            <span style="font-size:0.9rem;">Layanan tersedia Senin-Jumat, 07:00-16:00</span>
+                        </li>
+                        <li style="padding:8px 0; display:flex; gap:12px;">
+                            <i class="fas fa-user-secret" style="color:var(--secondary);"></i>
+                            <span style="font-size:0.9rem;">Mode anonim melindungi identitas Anda</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer" style="margin-top:40px;">
+        <div class="container">
+            <div class="footer-bottom" style="border-top:1px solid rgba(255,255,255,0.08); padding-top:20px;">
+                <p>&copy; 2026 SI-KONCI SMPN 13 PPU. Inovasi Daerah Kabupaten Penajam Paser Utara.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Chat functionality
+        document.getElementById('sendChat').addEventListener('click', function() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const chatBox = document.getElementById('chatBox');
+            const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+            const div = document.createElement('div');
+            div.className = 'chat-msg sent';
+            div.innerHTML = `<strong>Anda:</strong> ${msg} <span class="time">${time}</span>`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            input.value = '';
+
+            // Auto reply
+            setTimeout(() => {
+                const reply = document.createElement('div');
+                reply.className = 'chat-msg received';
+                const replies = [
+                    'Terima kasih sudah berbagi. Saya mendengarkan Anda. 😊',
+                    'Apakah ada yang ingin Anda ceritakan lebih lanjut?',
+                    'Saya di sini untuk membantu. Silakan lanjutkan.',
+                    'Terima kasih sudah percaya. Ceritakan apa yang Anda rasakan.'
+                ];
+                reply.innerHTML = `<strong>Guru BK:</strong> ${replies[Math.floor(Math.random() * replies.length)]} <span class="time">${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>`;
+                chatBox.appendChild(reply);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 1000);
+        });
+
+        // Enter key for chat
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('sendChat').click();
+            }
+        });
+
+        // Mode toggle
+        document.getElementById('modeNormal').addEventListener('click', function() {
+            document.getElementById('modeNormal').classList.add('active-mode');
+            document.getElementById('modeAnon').classList.remove('active-mode');
+            document.getElementById('chatBox').innerHTML = `
+                <div class="chat-msg received">
+                    <strong>Guru BK:</strong> Mode Normal aktif. Identitas Anda terlihat. 😊
+                    <span class="time">${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+            `;
+        });
+
+        document.getElementById('modeAnon').addEventListener('click', function() {
+            document.getElementById('modeAnon').classList.add('active-mode');
+            document.getElementById('modeNormal').classList.remove('active-mode');
+            document.getElementById('chatBox').innerHTML = `
+                <div class="chat-msg received">
+                    <strong>Guru BK:</strong> Mode Anonim aktif. Identitas Anda dilindungi. 🔒
+                    <span class="time">${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+            `;
+        });
+
+        // Booking
+        document.getElementById('btnReservasi').addEventListener('click', function() {
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('bookingTime').value;
+            const topic = document.getElementById('bookingTopic').value;
+            const note = document.getElementById('bookingNote').value;
+
+            if (!date || !time || !topic) {
+                alert('Mohon lengkapi semua data reservasi!');
+                return;
+            }
+
+            alert('✅ Reservasi berhasil diajukan!\n\n' +
+                'Tanggal: ' + date + '\n' +
+                'Jam: ' + time + '\n' +
+                'Topik: ' + topic + '\n' +
+                'Catatan: ' + (note || '-') + '\n\n' +
+                'Tunggu konfirmasi dari Guru BK. 🙏');
+        });
+
+        console.log('SI-KONCI - Portal Siswa siap digunakan.');
+    </script>
+    // Tambahkan di siswa.html sebelum </body>
+<script>
+    // Fungsi untuk load data dari Supabase
+    async function loadDataFromSupabase() {
+        try {
+            // Cek session
+            const user = JSON.parse(sessionStorage.getItem('user'));
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load data siswa
+            const siswaData = await getData('siswa', { nis: user.nis });
+            if (siswaData && siswaData.length > 0) {
+                const siswa = siswaData[0];
+                document.querySelector('.portal-hero h1').textContent = 
+                    `Selamat Datang, ${siswa.nama}!`;
+            }
+
+            // Load rekam medis
+            const rekamData = await getData('rekam_medis', { siswa_nis: user.nis });
+            // Update UI dengan data rekam medis...
+
+        } catch (error) {
+            console.error('Error loading data:', error);
+        }
+    }
+
+    // Panggil fungsi saat halaman dimuat
+    if (document.readyState === 'complete') {
+        loadDataFromSupabase();
+    } else {
+        document.addEventListener('DOMContentLoaded', loadDataFromSupabase);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SI-KONCI - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7ff 0%, #e8f5e9 100%);
+            padding: 20px;
+        }
+        .login-container {
+            background: white;
+            border-radius: 24px;
+            padding: 48px 40px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+        }
+        .login-container .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .login-container .logo i {
+            font-size: 2.5rem;
+            color: var(--secondary);
+        }
+        .login-container .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-top: 8px;
+        }
+        .login-container .logo p {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-family);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.15);
+        }
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+            padding: 14px;
+            font-size: 1rem;
+        }
+        .login-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+        .login-footer a {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            display: none;
+        }
+        .alert.error {
+            display: block;
+            background: #fce4ec;
+            color: #c62828;
+            border-left: 4px solid #c62828;
+        }
+        .alert.success {
+            display: block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-container">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <h1>SI-KONCI</h1>
+                <p>Sistem Konseling Cerdas & Integratif</p>
+                <p style="font-size:0.8rem; color:var(--gray-500);">SMPN 13 Penajam Paser Utara</p>
+            </div>
+
+            <div id="alertMessage" class="alert"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="email" placeholder="Masukkan email" required />
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="password" placeholder="Masukkan password" required />
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-user-tag"></i> Login Sebagai</label>
+                    <select id="role">
+                        <option value="siswa">Siswa</option>
+                        <option value="guru">Guru BK</option>
+                        <option value="orangtua">Orang Tua</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Masuk
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <p>Belum punya akun? <a href="#" id="showRegister">Daftar di sini</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; display:none; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:white; border-radius:24px; padding:40px; max-width:440px; width:100%; max-height:90vh; overflow-y:auto;">
+            <h2 style="text-align:center; margin-bottom:24px;">Daftar Akun</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="regName" placeholder="Nama lengkap" required />
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="regEmail" placeholder="Email" required />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" placeholder="Minimal 6 karakter" required minlength="6" />
+                </div>
+                <div class="form-group">
+                    <label>Daftar Sebagai</label>
+                    <select id="regRole">
+                        <option value="siswa">Siswa</option>
+                        <option value="guru">Guru BK</option>
+                        <option value="orangtua">Orang Tua</option>
+                    </select>
+                </div>
+                <div class="form-group" id="regSiswaFields">
+                    <label>NIS (untuk siswa)</label>
+                    <input type="text" id="regNIS" placeholder="NIS" />
+                </div>
+                <div class="form-group" id="regKelasField">
+                    <label>Kelas (untuk siswa)</label>
+                    <input type="text" id="regKelas" placeholder="Contoh: IX-A" />
+                </div>
+                <button type="submit" class="btn btn-secondary btn-block">Daftar</button>
+                <button type="button" id="closeRegister" class="btn btn-outline btn-block" style="margin-top:8px;">Batal</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const alertEl = document.getElementById('alertMessage');
+            const showRegister = document.getElementById('showRegister');
+            const registerModal = document.getElementById('registerModal');
+            const closeRegister = document.getElementById('closeRegister');
+            const regRole = document.getElementById('regRole');
+            const regSiswaFields = document.getElementById('regSiswaFields');
+            const regKelasField = document.getElementById('regKelasField');
+
+            // Show/hide register fields based on role
+            regRole.addEventListener('change', function() {
+                if (this.value === 'siswa') {
+                    regSiswaFields.style.display = 'block';
+                    regKelasField.style.display = 'block';
+                } else {
+                    regSiswaFields.style.display = 'none';
+                    regKelasField.style.display = 'none';
+                }
+            });
+
+            // Show register modal
+            showRegister.addEventListener('click', function(e) {
+                e.preventDefault();
+                registerModal.style.display = 'flex';
+            });
+
+            // Close register modal
+            closeRegister.addEventListener('click', function() {
+                registerModal.style.display = 'none';
+            });
+
+            // Close modal on outside click
+            registerModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+
+            // Login
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const role = document.getElementById('role').value;
+
+                // Show loading
+                const btn = this.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                btn.disabled = true;
+
+                try {
+                    // Coba login dengan Supabase
+                    const result = await loginUser(email, password, role);
+                    
+                    if (result) {
+                        // Simpan session
+                        sessionStorage.setItem('user', JSON.stringify(result));
+                        sessionStorage.setItem('role', role);
+                        
+                        // Redirect berdasarkan role
+                        const redirectMap = {
+                            siswa: 'siswa.html',
+                            guru: 'guru.html',
+                            orangtua: 'orangtua.html'
+                        };
+                        window.location.href = redirectMap[role] || 'index.html';
+                    } else {
+                        showAlert('Email atau password salah!', 'error');
+                    }
+                } catch (error) {
+                    showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                }
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+
+            // Register
+            document.getElementById('registerForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const name = document.getElementById('regName').value;
+                const email = document.getElementById('regEmail').value;
+                const password = document.getElementById('regPassword').value;
+                const role = document.getElementById('regRole').value;
+
+                const data = {
+                    nama: name,
+                    email: email,
+                    password: password
+                };
+
+                if (role === 'siswa') {
+                    data.nis = document.getElementById('regNIS').value;
+                    data.kelas = document.getElementById('regKelas').value;
+                    data.no_hp = '';
+                } else if (role === 'guru') {
+                    data.nip = 'GURU' + Date.now().toString().slice(-6);
+                    data.mata_pelajaran = 'BK';
+                    data.no_hp = '';
+                } else {
+                    data.id_orangtua = 'ORTU' + Date.now().toString().slice(-6);
+                    data.anak_nis = '';
+                    data.anak_nama = '';
+                    data.no_hp = '';
+                }
+
+                try {
+                    const result = await registerUser(data, role);
+                    if (result) {
+                        showAlert('Registrasi berhasil! Silakan login.', 'success');
+                        registerModal.style.display = 'none';
+                        document.getElementById('email').value = email;
+                        document.getElementById('password').value = password;
+                    } else {
+                        showAlert('Registrasi gagal. Coba lagi.', 'error');
+                    }
+                } catch (error) {
+                    showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                }
+            });
+
+            function showAlert(message, type) {
+                alertEl.textContent = message;
+                alertEl.className = 'alert ' + type;
+                alertEl.style.display = 'block';
+                setTimeout(() => {
+                    alertEl.style.display = 'none';
+                }, 5000);
+            }
+
+            // Auto-fill for demo
+            // Hapus bagian ini untuk production
+            document.getElementById('email').value = 'andi@email.com';
+            document.getElementById('password').value = 'password123';
+        });
+    </script>
+</body>
+</html>

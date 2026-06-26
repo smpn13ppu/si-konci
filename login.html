@@ -1,156 +1,17 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <!-- login.html - Bagian head -->
-<head>
-    <!-- ... -->
-    <!-- LOAD SUPABASE CDN DULUAN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- LOAD SUPABASE CLIENT -->
-    <script src="supabase-client.js"></script>
-</head>
-
-<!-- Bagian script di body -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Page loaded!');
-    
-    // Cek apakah fungsi tersedia
-    console.log('getSupabase function exists?', typeof getSupabase !== 'undefined');
-    console.log('loginUser function exists?', typeof loginUser !== 'undefined');
-    
-    // Test koneksi
-    if (typeof testSupabaseConnection === 'function') {
-        testSupabaseConnection();
-    }
-    
-    const loginForm = document.getElementById('loginForm');
-    
-    if (loginForm) {
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
-            
-            console.log('📤 Login attempt:', { email, role });
-            
-            // Tampilkan loading
-            const btn = this.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-            btn.disabled = true;
-            
-            try {
-                // Pastikan fungsi loginUser tersedia
-                if (typeof loginUser !== 'function') {
-                    throw new Error('loginUser function not found!');
-                }
-                
-                const result = await loginUser(email, password, role);
-                console.log('📥 Login result:', result);
-                
-                if (result) {
-                    // Simpan session
-                    sessionStorage.setItem('user', JSON.stringify(result));
-                    sessionStorage.setItem('role', role);
-                    
-                    // Redirect
-                    const redirects = {
-                        siswa: 'siswa.html',
-                        guru: 'guru.html',
-                        orangtua: 'orangtua.html'
-                    };
-                    window.location.href = redirects[role] || 'index.html';
-                } else {
-                    alert('❌ Login gagal! Periksa email dan password.\n\n' +
-                          'Akun demo:\n' +
-                          'Email: andi@email.com\n' +
-                          'Password: password123\n' +
-                          'Role: Siswa');
-                }
-            } catch (error) {
-                console.error('❌ Login error:', error);
-                alert('❌ Error: ' + error.message + '\n\nCoba refresh halaman.');
-            }
-            
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        });
-    }
-    
-    // Register form
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const role = document.getElementById('regRole').value;
-            
-            const data = {
-                nama: name,
-                email: email,
-                password: password
-            };
-            
-            if (role === 'siswa') {
-                data.nis = document.getElementById('regNIS').value || 'SIS' + Date.now().toString().slice(-6);
-                data.kelas = document.getElementById('regKelas').value || 'IX-A';
-                data.no_hp = '';
-            } else if (role === 'guru') {
-                data.nip = 'GUR' + Date.now().toString().slice(-6);
-                data.mata_pelajaran = 'BK';
-                data.no_hp = '';
-            } else {
-                data.id_orangtua = 'ORT' + Date.now().toString().slice(-6);
-                data.anak_nis = '';
-                data.anak_nama = '';
-                data.no_hp = '';
-            }
-            
-            try {
-                const result = await registerUser(data, role);
-                if (result) {
-                    alert('✅ Registrasi berhasil! Silakan login.');
-                    document.getElementById('registerModal').style.display = 'none';
-                    document.getElementById('email').value = email;
-                    document.getElementById('password').value = password;
-                } else {
-                    alert('❌ Registrasi gagal. Coba lagi.');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        });
-    }
-    
-    // Register modal
-    const showRegister = document.getElementById('showRegister');
-    if (showRegister) {
-        showRegister.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('registerModal').style.display = 'flex';
-        });
-    }
-    
-    const closeRegister = document.getElementById('closeRegister');
-    if (closeRegister) {
-        closeRegister.addEventListener('click', function() {
-            document.getElementById('registerModal').style.display = 'none';
-        });
-    }
-});
-</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SI-KONCI - Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="css/style.css" />
+    
+    <!-- LOAD SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    
     <style>
         .login-page {
             min-height: 100vh;
@@ -225,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .login-footer a {
             color: var(--secondary);
             font-weight: 600;
+            cursor: pointer;
         }
         .alert {
             padding: 12px 16px;
@@ -243,6 +105,71 @@ document.addEventListener('DOMContentLoaded', function() {
             background: #e8f5e9;
             color: #2e7d32;
             border-left: 4px solid #2e7d32;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-outline:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .required {
+            color: var(--danger);
+        }
+        small {
+            display: block;
+            margin-top: 4px;
+        }
+        .register-fields {
+            display: none;
         }
     </style>
 </head>
@@ -281,13 +208,13 @@ document.addEventListener('DOMContentLoaded', function() {
             </form>
 
             <div class="login-footer">
-                <p>Belum punya akun? <a href="#" id="showRegister">Daftar di sini</a></p>
+                <p>Belum punya akun? <a id="showRegister">Daftar di sini</a></p>
             </div>
         </div>
     </div>
 
     <!-- Register Modal -->
-    <div id="registerModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; display:none; align-items:center; justify-content:center; padding:20px;">
+    <div id="registerModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; padding:20px;">
         <div style="background:white; border-radius:24px; padding:40px; max-width:440px; width:100%; max-height:90vh; overflow-y:auto;">
             <h2 style="text-align:center; margin-bottom:24px;">Daftar Akun</h2>
             <form id="registerForm">
@@ -307,18 +234,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     <label>Daftar Sebagai</label>
                     <select id="regRole">
                         <option value="siswa">Siswa</option>
-                        <option value="guru">Guru BK</option>
                         <option value="orangtua">Orang Tua</option>
                     </select>
                 </div>
-                <div class="form-group" id="regSiswaFields">
-                    <label>NIS (untuk siswa)</label>
-                    <input type="text" id="regNIS" placeholder="NIS" />
+                
+                <!-- Field untuk Siswa -->
+<div class="form-group register-fields" id="regSiswaFields">
+    <label>NIS <span class="required">*</span></label>
+    <input type="text" id="regNIS" placeholder="Masukkan NIS" required />
+    <small style="color: var(--gray-500); font-size: 0.8rem;">
+        <i class="fas fa-info-circle"></i> NIS wajib diisi!
+    </small>
+</div>
+<div class="form-group register-fields" id="regKelasField">
+    <label>Kelas</label>
+    <input type="text" id="regKelas" placeholder="Contoh: 7A" />
+    
+</div>
+                
+                <!-- Field untuk Orang Tua -->
+                <div class="form-group register-fields" id="regAnakFields">
+                    <label>NIS Anak <span class="required">*</span></label>
+                    <input type="text" id="regAnakNIS" placeholder="Masukkan NIS anak" />
+                    <small style="color: var(--gray-500); font-size: 0.8rem;">
+                        <i class="fas fa-info-circle"></i> Jika NIS belum terdaftar, akan disimpan dan terhubung otomatis saat siswa mendaftar
+                    </small>
                 </div>
-                <div class="form-group" id="regKelasField">
-                    <label>Kelas (untuk siswa)</label>
-                    <input type="text" id="regKelas" placeholder="Contoh: IX-A" />
+                <div class="form-group register-fields" id="regAnakNamaField">
+                    <label>Nama Anak <span class="required">*</span></label>
+                    <input type="text" id="regAnakNama" placeholder="Masukkan nama anak" />
                 </div>
+                
                 <button type="submit" class="btn btn-secondary btn-block">Daftar</button>
                 <button type="button" id="closeRegister" class="btn btn-outline btn-block" style="margin-top:8px;">Batal</button>
             </form>
@@ -327,67 +273,132 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Login page loaded');
+            
+            // Test connection
+            if (typeof testSupabaseConnection === 'function') {
+                testSupabaseConnection();
+            }
+            
+            // ============================================
+            // DOM ELEMENTS
+            // ============================================
             const loginForm = document.getElementById('loginForm');
             const alertEl = document.getElementById('alertMessage');
             const showRegister = document.getElementById('showRegister');
             const registerModal = document.getElementById('registerModal');
             const closeRegister = document.getElementById('closeRegister');
+            
+            // Register form elements
             const regRole = document.getElementById('regRole');
             const regSiswaFields = document.getElementById('regSiswaFields');
             const regKelasField = document.getElementById('regKelasField');
+            const regAnakFields = document.getElementById('regAnakFields');
+            const regAnakNamaField = document.getElementById('regAnakNamaField');
 
-            // Show/hide register fields based on role
-            regRole.addEventListener('change', function() {
-                if (this.value === 'siswa') {
+            // ============================================
+            // SHOW/HIDE REGISTER FIELDS BERDASARKAN ROLE
+            // ============================================
+            function toggleRegisterFields() {
+                // Sembunyikan semua field tambahan dulu
+                regSiswaFields.style.display = 'none';
+                regKelasField.style.display = 'none';
+                regAnakFields.style.display = 'none';
+                regAnakNamaField.style.display = 'none';
+                
+                if (regRole.value === 'siswa') {
                     regSiswaFields.style.display = 'block';
                     regKelasField.style.display = 'block';
-                } else {
-                    regSiswaFields.style.display = 'none';
-                    regKelasField.style.display = 'none';
+                } else if (regRole.value === 'orangtua') {
+                    regAnakFields.style.display = 'block';
+                    regAnakNamaField.style.display = 'block';
                 }
-            });
+            }
 
-            // Show register modal
+            // Event listener untuk perubahan role
+            regRole.addEventListener('change', toggleRegisterFields);
+            
+            // Jalankan pertama kali untuk set default
+            toggleRegisterFields();
+
+            // ============================================
+            // SHOW/HIDE REGISTER MODAL
+            // ============================================
             showRegister.addEventListener('click', function(e) {
                 e.preventDefault();
                 registerModal.style.display = 'flex';
+                // Reset form
+                document.getElementById('registerForm').reset();
+                toggleRegisterFields();
             });
 
-            // Close register modal
             closeRegister.addEventListener('click', function() {
                 registerModal.style.display = 'none';
             });
 
-            // Close modal on outside click
             registerModal.addEventListener('click', function(e) {
                 if (e.target === this) {
                     this.style.display = 'none';
                 }
             });
 
-            // Login
+            // ============================================
+            // LOGIN
+            // ============================================
             loginForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
+                
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
                 const role = document.getElementById('role').value;
 
-                // Show loading
                 const btn = this.querySelector('button[type="submit"]');
                 const originalText = btn.innerHTML;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
                 btn.disabled = true;
 
                 try {
-                    // Coba login dengan Supabase
+                    // === VALIDASI SEBELUM LOGIN ===
+                    const client = getSupabase();
+                    if (!client) {
+                        throw new Error('Koneksi database gagal');
+                    }
+                    
+                    const tableMap = { siswa: 'siswa', guru: 'guru', orangtua: 'orangtua' };
+                    const table = tableMap[role];
+                    
+                    // Cek apakah email terdaftar di tabel sesuai role
+                    const { data: userCheck, error: checkError } = await client
+                        .from(table)
+                        .select('email, nama')
+                        .eq('email', email)
+                        .maybeSingle();
+                    
+                    if (checkError) {
+                        console.error('❌ Check error:', checkError);
+                    }
+                    
+                    if (!userCheck) {
+                        const roleNames = {
+                            siswa: 'Siswa',
+                            guru: 'Guru BK',
+                            orangtua: 'Orang Tua'
+                        };
+                        alert(`❌ Email tidak terdaftar sebagai ${roleNames[role]}.\n\nSilakan:\n1. Periksa kembali email Anda\n2. Pilih role yang sesuai\n3. Daftar jika belum memiliki akun`);
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        return;
+                    }
+                    
+                    console.log('✅ User found as:', role, userCheck.nama);
+                    
+                    // === LANJUTKAN LOGIN ===
                     const result = await loginUser(email, password, role);
                     
                     if (result) {
-                        // Simpan session
                         sessionStorage.setItem('user', JSON.stringify(result));
                         sessionStorage.setItem('role', role);
                         
-                        // Redirect berdasarkan role
                         const redirectMap = {
                             siswa: 'siswa.html',
                             guru: 'guru.html',
@@ -395,19 +406,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         };
                         window.location.href = redirectMap[role] || 'index.html';
                     } else {
-                        showAlert('Email atau password salah!', 'error');
+                        alert('❌ Login gagal! Periksa email dan password Anda.');
                     }
                 } catch (error) {
-                    showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                    console.error('❌ Login error:', error);
+                    alert('Terjadi kesalahan: ' + error.message);
                 }
 
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             });
 
-            // Register
+            // ============================================
+            // REGISTER
+            // ============================================
             document.getElementById('registerForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
+                
                 const name = document.getElementById('regName').value;
                 const email = document.getElementById('regEmail').value;
                 const password = document.getElementById('regPassword').value;
@@ -419,162 +434,121 @@ document.addEventListener('DOMContentLoaded', function() {
                     password: password
                 };
 
+                let result = null;
+
+                // === VALIDASI ===
+                if (!name || !email || !password) {
+                    alert('⚠️ Mohon lengkapi semua field!');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    alert('⚠️ Password minimal 6 karakter!');
+                    return;
+                }
+
                 if (role === 'siswa') {
-                    data.nis = document.getElementById('regNIS').value;
-                    data.kelas = document.getElementById('regKelas').value;
-                    data.no_hp = '';
-                } else if (role === 'guru') {
-                    data.nip = 'GURU' + Date.now().toString().slice(-6);
-                    data.mata_pelajaran = 'BK';
-                    data.no_hp = '';
-                } else {
-                    data.id_orangtua = 'ORTU' + Date.now().toString().slice(-6);
-                    data.anak_nis = '';
-                    data.anak_nama = '';
-                    data.no_hp = '';
-                }
-
-                try {
-                    const result = await registerUser(data, role);
-                    if (result) {
-                        showAlert('Registrasi berhasil! Silakan login.', 'success');
-                        registerModal.style.display = 'none';
-                        document.getElementById('email').value = email;
-                        document.getElementById('password').value = password;
-                    } else {
-                        showAlert('Registrasi gagal. Coba lagi.', 'error');
-                    }
-                } catch (error) {
-                    showAlert('Terjadi kesalahan: ' + error.message, 'error');
-                }
-            });
-
-            function showAlert(message, type) {
-                alertEl.textContent = message;
-                alertEl.className = 'alert ' + type;
-                alertEl.style.display = 'block';
-                setTimeout(() => {
-                    alertEl.style.display = 'none';
-                }, 5000);
-            }
-
-            // Auto-fill for demo
-            // Hapus bagian ini untuk production
-            document.getElementById('email').value = 'andi@email.com';
-            document.getElementById('password').value = 'password123';
-        });
-    </script>
-    <!-- login.html - Bagian script -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Page loaded!');
+    var nis = document.getElementById('regNIS').value.trim();
+    var kelas = document.getElementById('regKelas').value.trim();
     
-    // Cek apakah fungsi tersedia
-    console.log('getSupabase function exists?', typeof getSupabase !== 'undefined');
-    console.log('loginUser function exists?', typeof loginUser !== 'undefined');
-    
-    // Test koneksi
-    if (typeof testSupabaseConnection === 'function') {
-        testSupabaseConnection();
+    // ✅ Validasi NIS
+    if (!nis) {
+        alert('⚠️ NIS wajib diisi untuk pendaftaran siswa!');
+        return;
     }
     
-    // LOGIN FORM
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
-            
-            console.log('📤 Login attempt:', { email, role });
-            
-            const btn = this.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-            btn.disabled = true;
-            
-            try {
-                // PASTIKAN MENGGUNAKAN FUNGSI DARI SUPABASE-CLIENT.JS
-                const result = await window.loginUser(email, password, role);
-                console.log('📥 Login result:', result);
+    // ✅ Cek NIS (real-time)
+    if (typeof cekNIS === 'function') {
+        const nisExists = await cekNIS(nis);
+        if (nisExists) {
+            alert('⚠️ NIS sudah terdaftar! Gunakan NIS yang lain.');
+            return;
+        }
+    }
+    
+    data.nis = nis;
+    data.kelas = kelas || 'Belum ditentukan';
+    data.no_hp = '';
+    
+    if (typeof registerSiswa !== 'function') {
+        alert('❌ Fungsi registerSiswa tidak ditemukan!');
+        return;
+    }
+    
+    // ✅ Handle hasil register dengan benar
+    const result = await registerSiswa(data);
+    
+    if (result && result.success) {
+        alert('✅ ' + result.message);
+        registerModal.style.display = 'none';
+        document.getElementById('email').value = data.email;
+        document.getElementById('password').value = data.password;
+        document.getElementById('role').value = 'siswa';
+    } else if (result && result.error) {
+        alert('❌ ' + result.error);
+    } else {
+        alert('❌ Registrasi gagal. Coba lagi.');
+    }
+                    
+                } else if (role === 'guru') {
+                    data.nip = 'GUR' + Date.now().toString().slice(-6);
+                    data.mata_pelajaran = 'Bimbingan Konseling';
+                    data.no_hp = '';
+                    
+                    result = await registerUser(data, role);
+                    
+                } else if (role === 'orangtua') {
+                    data.id_orangtua = 'ORT' + Date.now().toString().slice(-6);
+                    data.anak_nis = document.getElementById('regAnakNIS').value.trim();
+                    data.anak_nama = document.getElementById('regAnakNama').value.trim();
+                    data.no_hp = '';
+                    
+                    // Validasi NIS
+                    if (!data.anak_nis) {
+                        alert('⚠️ Mohon masukkan NIS anak!');
+                        return;
+                    }
+                    
+                    if (typeof registerOrangTua !== 'function') {
+                        alert('❌ Fungsi registerOrangTua tidak ditemukan!');
+                        return;
+                    }
+                    result = await registerOrangTua(data);
+                }
+
+                // Handle hasil registrasi
+                if (result && result.error) {
+                    alert('❌ ' + result.error);
+                    return;
+                }
                 
                 if (result) {
-                    sessionStorage.setItem('user', JSON.stringify(result));
-                    sessionStorage.setItem('role', role);
-                    
-                    const redirects = {
-                        siswa: 'siswa.html',
-                        guru: 'guru.html',
-                        orangtua: 'orangtua.html'
+                    const roleNames = {
+                        siswa: 'Siswa',
+                        guru: 'Guru BK',
+                        orangtua: 'Orang Tua'
                     };
-                    window.location.href = redirects[role] || 'index.html';
-                } else {
-                    alert('❌ Login gagal!\n\n' +
-                          'Coba dengan akun demo:\n' +
-                          'Email: andi@email.com\n' +
-                          'Password: password123\n' +
-                          'Role: Siswa');
-                }
-            } catch (error) {
-                console.error('❌ Login error:', error);
-                alert('❌ Error: ' + error.message);
-            }
-            
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        });
-    }
-    
-    // REGISTER FORM
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const role = document.getElementById('regRole').value;
-            
-            const data = {
-                nama: name,
-                email: email,
-                password: password
-            };
-            
-            if (role === 'siswa') {
-                data.nis = document.getElementById('regNIS').value || 'SIS' + Date.now().toString().slice(-6);
-                data.kelas = document.getElementById('regKelas').value || 'IX-A';
-                data.no_hp = '';
-            } else if (role === 'guru') {
-                data.nip = 'GUR' + Date.now().toString().slice(-6);
-                data.mata_pelajaran = 'BK';
-                data.no_hp = '';
-            } else {
-                data.id_orangtua = 'ORT' + Date.now().toString().slice(-6);
-                data.anak_nis = '';
-                data.anak_nama = '';
-                data.no_hp = '';
-            }
-            
-            try {
-                const result = await window.registerUser(data, role);
-                if (result) {
-                    alert('✅ Registrasi berhasil! Silakan login.');
-                    document.getElementById('registerModal').style.display = 'none';
+                    alert(`✅ Registrasi berhasil sebagai ${roleNames[role]}! Silakan login.`);
+                    registerModal.style.display = 'none';
                     document.getElementById('email').value = email;
                     document.getElementById('password').value = password;
+                    document.getElementById('role').value = role;
                 } else {
                     alert('❌ Registrasi gagal. Coba lagi.');
                 }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
+            });
+
+            // ============================================
+            // CLOSE MODAL WITH ESC
+            // ============================================
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && registerModal.style.display === 'flex') {
+                    registerModal.style.display = 'none';
+                }
+            });
+
+            console.log('✅ Login page ready');
         });
-    }
-});
-</script>
+    </script>
 </body>
 </html>

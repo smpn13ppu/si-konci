@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <!-- LOAD SUPABASE CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- LOAD SUPABASE CLIENT -->
+    <script src="supabase-client.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SI-KONCI - Portal Orang Tua</title>
@@ -168,6 +172,28 @@
         .status.confirmed { background: #e8f5e9; color: #2e7d32; }
         .status.done { background: #e3f2fd; color: #1565c0; }
 
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray-500);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        .empty-state h4 {
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+
         @media (max-width: 768px) {
             .portal-grid {
                 grid-template-columns: 1fr;
@@ -191,7 +217,7 @@
                 <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> Beranda</a></li>
                 <li><a href="#notifikasi" class="nav-link active">Buku Penghubung</a></li>
                 <li><a href="#konsultasi" class="nav-link">E-Konsultasi</a></li>
-                <li><a href="index.html" class="btn-nav btn-outline"><i class="fas fa-sign-out-alt"></i> Keluar</a></li>
+                <li><a href="login.html" class="btn-nav btn-outline" id="btnLogout"><i class="fas fa-sign-out-alt"></i> Keluar</a></li>
             </ul>
             <div class="hamburger">
                 <span></span>
@@ -204,7 +230,7 @@
     <!-- HERO -->
     <section class="portal-hero">
         <div class="container">
-            <h1><i class="fas fa-users" style="color: var(--secondary);"></i> Portal Orang Tua</h1>
+            <h1><i class="fas fa-users" style="color: var(--secondary);"></i> <span id="heroTitle">Portal Orang Tua</span></h1>
             <p>Pantau perkembangan anak dan komunikasi dengan guru BK secara mudah.</p>
         </div>
     </section>
@@ -212,59 +238,22 @@
     <!-- MAIN CONTENT -->
     <section class="portal">
         <div class="container portal-grid">
-            <!-- LEFT: Buku Penghubung -->
-            <div>
-                <div class="portal-card" id="notifikasi">
-                    <div class="card-header">
-                        <i class="fas fa-book-open"></i>
-                        <h3>Buku Penghubung Digital</h3>
-                        <span class="badge" style="margin-left:auto; background:var(--secondary); color:white; font-size:0.65rem; padding:2px 12px; border-radius:50px;">2 Baru</span>
-                    </div>
-                    <div class="notif-list">
-                        <div class="notif-item">
-                            <div class="notif-header">
-                                <span><strong>Anak: Andi Prasetyo</strong> (IX-A)</span>
-                                <span>15 Juni 2026</span>
-                            </div>
-                            <div class="notif-content">
-                                <span class="notif-badge positif">Positif</span>
-                                <p style="margin-top:4px;">Andi menunjukkan peningkatan motivasi belajar dalam 2 minggu terakhir.</p>
-                            </div>
-                        </div>
-                        <div class="notif-item">
-                            <div class="notif-header">
-                                <span><strong>Anak: Andi Prasetyo</strong> (IX-A)</span>
-                                <span>12 Juni 2026</span>
-                            </div>
-                            <div class="notif-content">
-                                <span class="notif-badge info">Informasi</span>
-                                <p style="margin-top:4px;">Hasil konseling: Andi sedang menghadapi stres ujian. Disarankan dukungan dari rumah.</p>
-                            </div>
-                        </div>
-                        <div class="notif-item">
-                            <div class="notif-header">
-                                <span><strong>Anak: Budi Santoso</strong> (IX-B)</span>
-                                <span>10 Juni 2026</span>
-                            </div>
-                            <div class="notif-content">
-                                <span class="notif-badge negatif">Perhatian</span>
-                                <p style="margin-top:4px;">Budi terlibat dalam kasus perundungan ringan. Telah dilakukan mediasi.</p>
-                            </div>
-                        </div>
-                        <div class="notif-item">
-                            <div class="notif-header">
-                                <span><strong>Anak: Budi Santoso</strong> (IX-B)</span>
-                                <span>8 Juni 2026</span>
-                            </div>
-                            <div class="notif-content">
-                                <span class="notif-badge positif">Positif</span>
-                                <p style="margin-top:4px;">Budi aktif dalam kegiatan ekstrakurikuler dan menunjukkan sikap positif.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!-- LEFT: Buku Penghubung -->
+<div>
+    <div class="portal-card" id="notifikasi">
+        <div class="card-header">
+            <i class="fas fa-book-open"></i>
+            <h3>Buku Penghubung Digital</h3>
+            <span class="badge" style="margin-left:auto; background:var(--secondary); color:white; font-size:0.65rem; padding:2px 12px; border-radius:50px;" id="notifBadge">0 Catatan</span>
+        </div>
+        <div class="notif-list" id="notifList">
+            <div class="empty-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Memuat data...</p>
             </div>
-
+        </div>
+    </div>
+</div>
             <!-- RIGHT: E-Konsultasi -->
             <div>
                 <div class="portal-card" id="konsultasi">
@@ -276,8 +265,7 @@
                     <div class="form-group">
                         <label>Anak</label>
                         <select id="konsultasiAnak">
-                            <option value="Andi Prasetyo">Andi Prasetyo - IX-A</option>
-                            <option value="Budi Santoso">Budi Santoso - IX-B</option>
+                            <option value="Anak">Anak Anda</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -301,27 +289,10 @@
                     <hr style="margin:20px 0; border:none; border-top:1px solid var(--gray-200);" />
 
                     <h4 style="font-size:0.95rem; font-weight:600; margin-bottom:12px;">Riwayat Konsultasi</h4>
-                    <div class="consult-list">
-                        <div class="consult-item">
-                            <div class="consult-info">
-                                <strong>Perkembangan Akademik</strong>
-                                <span style="font-size:0.8rem; color:var(--gray-600);">Andi - 14 Juni 2026</span>
-                            </div>
-                            <span class="status done">Selesai</span>
-                        </div>
-                        <div class="consult-item">
-                            <div class="consult-info">
-                                <strong>Perilaku Sosial</strong>
-                                <span style="font-size:0.8rem; color:var(--gray-600);">Budi - 10 Juni 2026</span>
-                            </div>
-                            <span class="status confirmed">Dikonfirmasi</span>
-                        </div>
-                        <div class="consult-item">
-                            <div class="consult-info">
-                                <strong>Kesehatan Mental</strong>
-                                <span style="font-size:0.8rem; color:var(--gray-600);">Andi - 5 Juni 2026</span>
-                            </div>
-                            <span class="status pending">Menunggu</span>
+                    <div class="consult-list" id="riwayatKonsultasiList">
+                        <div class="empty-state">
+                            <i class="fas fa-handshake"></i>
+                            <p>Memuat data...</p>
                         </div>
                     </div>
                 </div>
@@ -358,63 +329,381 @@
 
     <script src="js/script.js"></script>
     <script>
-        // Konsultasi
-        document.getElementById('btnKonsultasi').addEventListener('click', function() {
+    /**
+     * SI-KONCI - Portal Orang Tua
+     * Load data from Supabase
+     */
+    (function() {
+        'use strict';
+
+        console.log('🚀 SI-KONCI Portal Orang Tua');
+
+        // ============================================
+        // CHECK LOGIN SESSION
+        // ============================================
+        function checkSession() {
+            try {
+                const user = JSON.parse(sessionStorage.getItem('user'));
+                const role = sessionStorage.getItem('role');
+                
+                if (!user || !role) {
+                    window.location.href = 'login.html';
+                    return null;
+                }
+                
+                if (role !== 'orangtua') {
+                    alert('❌ Akses ditolak! Anda login sebagai ' + role + ', bukan Orang Tua');
+                    window.location.href = 'login.html';
+                    return null;
+                }
+                
+                return user;
+            } catch {
+                window.location.href = 'login.html';
+                return null;
+            }
+        }
+
+        const currentUser = checkSession();
+        if (!currentUser) return;
+
+        console.log('👤 Orang Tua:', currentUser.nama);
+        console.log('👶 Anak NIS:', currentUser.anak_nis);
+
+        // Tampilkan nama orang tua di hero
+        const heroTitle = document.getElementById('heroTitle');
+        if (heroTitle && currentUser.nama) {
+            heroTitle.textContent = 'Selamat Datang, ' + currentUser.nama + '!';
+        }
+
+        // Update dropdown anak
+        const anakSelect = document.getElementById('konsultasiAnak');
+        if (anakSelect && currentUser.anak_nama) {
+            anakSelect.innerHTML = `<option value="${currentUser.anak_nama}">${currentUser.anak_nama} - ${currentUser.anak_nis || ''}</option>`;
+        }
+
+    // ============================================
+    // LOAD BUKU PENGHUBUNG (Rekam Medis)
+    // ============================================
+    async function loadBukuPenghubung() {
+        console.log('📋 Loading Buku Penghubung...');
+
+        try {
+            const client = getSupabase();
+            if (!client) {
+                console.error('❌ Supabase client not initialized');
+                return;
+            }
+
+            const list = document.getElementById('notifList');
+            const badge = document.getElementById('notifBadge');
+
+            // Ambil NIS anak dari session
+            const user = JSON.parse(sessionStorage.getItem('user'));
+            const anakNis = user?.anak_nis;
+            
+            console.log('👤 User:', user);
+            console.log('👶 NIS Anak:', anakNis);
+            
+            if (!anakNis) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-slash"></i>
+                        <h4>Belum Ada Anak Terhubung</h4>
+                        <p>Silakan hubungi admin untuk menghubungkan akun Anda dengan anak.</p>
+                    </div>
+                `;
+                if (badge) badge.textContent = '0 Catatan';
+                return;
+            }
+
+            // Query rekam medis berdasarkan NIS anak
+            console.log('📤 Query rekam_medis dengan NIS:', anakNis);
+            
+            const { data, error } = await client
+                .from('rekam_medis')
+                .select('*')
+                .eq('siswa_nis', anakNis)
+                .order('tanggal', { ascending: false })
+                .limit(10);
+
+            if (error) {
+                console.error('❌ Error load rekam medis:', error);
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h4>Gagal Memuat Data</h4>
+                        <p>${error.message || 'Silakan refresh halaman'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            console.log('📊 Data rekam medis ditemukan:', data?.length || 0, 'items');
+
+            if (!data || data.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-book"></i>
+                        <h4>Belum Ada Catatan</h4>
+                        <p>Belum ada catatan perkembangan untuk anak Anda.</p>
+                        <p style="font-size:0.85rem; color:var(--gray-500); margin-top:8px;">
+                            NIS: ${anakNis}
+                        </p>
+                    </div>
+                `;
+                if (badge) badge.textContent = '0 Catatan';
+                return;
+            }
+
+            if (badge) badge.textContent = data.length + ' Catatan';
+
+            list.innerHTML = data.map(item => {
+                // Tentukan badge berdasarkan kategori
+                let badgeClass = 'info';
+                let badgeText = 'Informasi';
+                
+                const positif = ['Motivasi', 'Prestasi', 'Positif', 'Baik', 'Semangat'];
+                const negatif = ['Bullying', 'Perundungan', 'Negatif', 'Perhatian', 'Masalah'];
+                
+                const kategori = item.kategori || '';
+                
+                if (positif.some(p => kategori.includes(p))) {
+                    badgeClass = 'positif';
+                    badgeText = 'Positif';
+                } else if (negatif.some(n => kategori.includes(n))) {
+                    badgeClass = 'negatif';
+                    badgeText = 'Perhatian';
+                }
+
+                const tanggal = new Date(item.tanggal);
+                const tanggalStr = tanggal.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                return `
+                    <div class="notif-item">
+                        <div class="notif-header">
+                            <span>
+                                <strong>${item.siswa_nama || 'Anak'}</strong>
+                                <span style="font-size:0.75rem; color:var(--gray-500); margin-left:8px;">
+                                    ${item.siswa_nis || '-'}
+                                </span>
+                            </span>
+                            <span>${tanggalStr}</span>
+                        </div>
+                        <div class="notif-content">
+                            <span class="notif-badge ${badgeClass}">${badgeText}</span>
+                            <p style="margin-top:6px;">${item.catatan || 'Tidak ada catatan'}</p>
+                            ${item.tindakan ? `<p style="font-size:0.85rem; color:var(--gray-600); margin-top:4px;"><strong>Tindakan:</strong> ${item.tindakan}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            console.log('✅ Buku Penghubung loaded:', data.length, 'items');
+
+        } catch (error) {
+            console.error('❌ Error:', error);
+            document.getElementById('notifList').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Terjadi Kesalahan</h4>
+                    <p>${error.message || 'Silakan refresh halaman'}</p>
+                </div>
+            `;
+        }
+    }
+        // ============================================
+        // LOAD RIWAYAT KONSULTASI
+        // ============================================
+        async function loadRiwayatKonsultasi() {
+            console.log('📋 Loading riwayat konsultasi...');
+
+            try {
+                const client = getSupabase();
+                if (!client) return;
+
+                const list = document.getElementById('riwayatKonsultasiList');
+                if (!list) return;
+
+                // Ambil data konsultasi berdasarkan orang tua
+                const orangtuaId = currentUser.id_orangtua || currentUser.id;
+                
+                const { data, error } = await client
+                    .from('konsultasi')
+                    .select('*')
+                    .eq('orangtua_id', orangtuaId)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                if (error) {
+                    console.error('❌ Error load konsultasi:', error);
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Gagal memuat data</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-handshake"></i>
+                            <p>Belum ada riwayat konsultasi</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const statusMap = {
+                    'pending': 'Menunggu',
+                    'confirmed': 'Dikonfirmasi',
+                    'done': 'Selesai'
+                };
+
+                const statusClass = {
+                    'pending': 'pending',
+                    'confirmed': 'confirmed',
+                    'done': 'done'
+                };
+
+                list.innerHTML = data.map(item => {
+                    const tanggal = new Date(item.tanggal || item.created_at);
+                    const tanggalStr = tanggal.toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+
+                    return `
+                        <div class="consult-item">
+                            <div class="consult-info">
+                                <strong>${item.topik || 'Konsultasi'}</strong>
+                                <span style="font-size:0.8rem; color:var(--gray-600);">${item.anak_nama || 'Anak'} - ${tanggalStr}</span>
+                            </div>
+                            <span class="status ${statusClass[item.status] || 'pending'}">${statusMap[item.status] || item.status}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                console.log('✅ Riwayat konsultasi loaded:', data.length, 'items');
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+            }
+        }
+
+        // ============================================
+        // AJUKAN KONSULTASI - FIXED
+        // ============================================
+        document.getElementById('btnKonsultasi').addEventListener('click', async function() {
             const anak = document.getElementById('konsultasiAnak').value;
             const topik = document.getElementById('konsultasiTopik').value;
             const catatan = document.getElementById('konsultasiCatatan').value.trim();
 
             if (!catatan) {
-                alert('Mohon isi catatan untuk konsultasi!');
+                alert('⚠️ Mohon isi catatan untuk konsultasi!');
                 return;
             }
 
-            alert('✅ Konsultasi berhasil diajukan!\n\n' +
-                'Anak: ' + anak + '\n' +
-                'Topik: ' + topik + '\n' +
-                'Catatan: ' + catatan + '\n\n' +
-                'Guru BK akan merespon dalam waktu 1x24 jam. 🙏');
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+            btn.disabled = true;
 
-            document.getElementById('konsultasiCatatan').value = '';
+            try {
+                const client = getSupabase();
+                if (!client) {
+                    throw new Error('Koneksi database gagal');
+                }
+
+                // === PERUBAHAN DI SINI ===
+                // Gunakan 'pesan' bukan 'catatan' jika kolom catatan tidak ada
+                const { error } = await client
+                    .from('konsultasi')
+                    .insert([{
+                        orangtua_id: currentUser.id_orangtua || currentUser.id,
+                        orangtua_nama: currentUser.nama,
+                        anak_nis: currentUser.anak_nis || '',
+                        anak_nama: anak,
+                        guru_nip: 'GUR001',
+                        topik: topik,
+                        pesan: catatan,  // <-- Gunakan 'pesan'
+                        status: 'pending',
+                        tanggal: new Date().toISOString().split('T')[0]
+                    }]);
+
+                if (error) {
+                    console.error('❌ Error konsultasi:', error);
+                    throw new Error(error.message);
+                }
+
+                alert('✅ Konsultasi berhasil diajukan!\n\n' +
+                    'Anak: ' + anak + '\n' +
+                    'Topik: ' + topik + '\n' +
+                    'Catatan: ' + catatan + '\n\n' +
+                    'Guru BK akan merespon dalam waktu 1x24 jam. 🙏');
+
+                document.getElementById('konsultasiCatatan').value = '';
+                await loadRiwayatKonsultasi();
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Gagal mengajukan konsultasi: ' + error.message);
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+        // ============================================
+        // LOGOUT
+        // ============================================
+        document.getElementById('btnLogout').addEventListener('click', function(e) {
+            e.preventDefault();
+            sessionStorage.removeItem('user');
+            sessionStorage.removeItem('role');
+            window.location.href = 'login.html';
         });
 
-        console.log('SI-KONCI - Portal Orang Tua siap digunakan.');
-    </script>
-    // Tambahkan di siswa.html sebelum </body>
-<script>
-    // Fungsi untuk load data dari Supabase
-    async function loadDataFromSupabase() {
+        // ============================================
+        // INIT
+        // ============================================
+  async function init() {
+        console.log('🚀 Initializing Portal Orang Tua...');
         try {
-            // Cek session
-            const user = JSON.parse(sessionStorage.getItem('user'));
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            // Load data siswa
-            const siswaData = await getData('siswa', { nis: user.nis });
-            if (siswaData && siswaData.length > 0) {
-                const siswa = siswaData[0];
-                document.querySelector('.portal-hero h1').textContent = 
-                    `Selamat Datang, ${siswa.nama}!`;
-            }
-
-            // Load rekam medis
-            const rekamData = await getData('rekam_medis', { siswa_nis: user.nis });
-            // Update UI dengan data rekam medis...
-
+            // Load data secara paralel
+            await Promise.all([
+                loadBukuPenghubung(),
+                loadRiwayatKonsultasi()
+            ]);
+            console.log('✅ Portal Orang Tua loaded successfully!');
         } catch (error) {
-            console.error('Error loading data:', error);
+            console.error('❌ Error initializing:', error);
         }
     }
 
-    // Panggil fungsi saat halaman dimuat
-    if (document.readyState === 'complete') {
-        loadDataFromSupabase();
-    } else {
-        document.addEventListener('DOMContentLoaded', loadDataFromSupabase);
-    }
-</script>
+        // Jalankan saat DOM siap
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            setTimeout(init, 300);
+        }
+
+        // Auto refresh setiap 30 detik
+        setInterval(() => {
+            if (document.getElementById('notifList')) {
+                loadBukuPenghubung();
+            }
+        }, 30000);
+
+        console.log('✅ Portal Orang Tua siap!');
+
+    })();
+    </script>
 </body>
 </html>

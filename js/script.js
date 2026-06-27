@@ -66,6 +66,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function animateCounter(el) {
         const target = parseInt(el.dataset.count);
+        // Lewati elemen tanpa data-count valid (mis. kartu statistik dashboard
+        // guru/admin yang diisi sendiri oleh skrip halaman) agar tidak jadi "NaN%".
+        if (isNaN(target)) return;
         const duration = 2000;
         const startTime = performance.now();
 

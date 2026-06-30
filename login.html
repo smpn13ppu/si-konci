@@ -239,18 +239,17 @@
                 </div>
                 
                 <!-- Field untuk Siswa -->
-<div class="form-group register-fields" id="regSiswaFields">
-    <label>NIS <span class="required">*</span></label>
-    <input type="text" id="regNIS" placeholder="Masukkan NIS" required />
-    <small style="color: var(--gray-500); font-size: 0.8rem;">
-        <i class="fas fa-info-circle"></i> NIS wajib diisi!
-    </small>
-</div>
-<div class="form-group register-fields" id="regKelasField">
-    <label>Kelas</label>
-    <input type="text" id="regKelas" placeholder="Contoh: 7A" />
-    
-</div>
+                <div class="form-group register-fields" id="regSiswaFields">
+                    <label>NIS <span class="required">*</span></label>
+                    <input type="text" id="regNIS" placeholder="Masukkan NIS" />
+                    <small style="color: var(--gray-500); font-size: 0.8rem;">
+                        <i class="fas fa-info-circle"></i> NIS wajib diisi!
+                    </small>
+                </div>
+                <div class="form-group register-fields" id="regKelasField">
+                    <label>Kelas</label>
+                    <input type="text" id="regKelas" placeholder="Contoh: 7A" />
+                </div>
                 
                 <!-- Field untuk Orang Tua -->
                 <div class="form-group register-fields" id="regAnakFields">
@@ -418,7 +417,7 @@
             });
 
             // ============================================
-            // REGISTER
+            // REGISTER - FIXED
             // ============================================
             document.getElementById('registerForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -447,76 +446,117 @@
                     return;
                 }
 
+                // === REGISTER SISWA ===
                 if (role === 'siswa') {
-    var nis = document.getElementById('regNIS').value.trim();
-    var kelas = document.getElementById('regKelas').value.trim();
-    
-    // ✅ Validasi NIS
-    if (!nis) {
-        alert('⚠️ NIS wajib diisi untuk pendaftaran siswa!');
-        return;
-    }
-    
-    // ✅ Cek NIS (real-time)
-    if (typeof cekNIS === 'function') {
-        const nisExists = await cekNIS(nis);
-        if (nisExists) {
-            alert('⚠️ NIS sudah terdaftar! Gunakan NIS yang lain.');
-            return;
-        }
-    }
-    
-    data.nis = nis;
-    data.kelas = kelas || 'Belum ditentukan';
-    data.no_hp = '';
-    
-    if (typeof registerSiswa !== 'function') {
-        alert('❌ Fungsi registerSiswa tidak ditemukan!');
-        return;
-    }
-    
-    // ✅ Handle hasil register dengan benar
-    const result = await registerSiswa(data);
-    
-    if (result && result.success) {
-        alert('✅ ' + result.message);
-        registerModal.style.display = 'none';
-        document.getElementById('email').value = data.email;
-        document.getElementById('password').value = data.password;
-        document.getElementById('role').value = 'siswa';
-    } else if (result && result.error) {
-        alert('❌ ' + result.error);
-    } else {
-        alert('❌ Registrasi gagal. Coba lagi.');
-    }
+                    var nis = document.getElementById('regNIS').value.trim();
+                    var kelas = document.getElementById('regKelas').value.trim();
                     
-                } else if (role === 'guru') {
+                    // ✅ Validasi NIS
+                    if (!nis) {
+                        alert('⚠️ NIS wajib diisi untuk pendaftaran siswa!');
+                        return;
+                    }
+                    
+                    // ✅ Cek NIS (real-time)
+                    if (typeof cekNIS === 'function') {
+                        const nisExists = await cekNIS(nis);
+                        if (nisExists) {
+                            alert('⚠️ NIS sudah terdaftar! Gunakan NIS yang lain.');
+                            return;
+                        }
+                    }
+                    
+                    data.nis = nis;
+                    data.kelas = kelas || 'Belum ditentukan';
+                    data.no_hp = '';
+                    
+                    if (typeof registerSiswa !== 'function') {
+                        alert('❌ Fungsi registerSiswa tidak ditemukan!');
+                        return;
+                    }
+                    
+                    // ✅ Handle hasil register dengan benar
+                    result = await registerSiswa(data);
+                    
+                    // ✅ PERBAIKAN: Cek result dengan benar
+                    if (result && result.success === true) {
+                        alert('✅ ' + result.message);
+                        registerModal.style.display = 'none';
+                        document.getElementById('email').value = data.email;
+                        document.getElementById('password').value = data.password;
+                        document.getElementById('role').value = 'siswa';
+                    } else if (result && result.error) {
+                        alert('❌ ' + result.error);
+                    } else {
+                        alert('❌ Registrasi gagal. Coba lagi.');
+                    }
+                    return; // ← Penting: stop di sini
+                }
+                
+                // === REGISTER GURU ===
+                else if (role === 'guru') {
                     data.nip = 'GUR' + Date.now().toString().slice(-6);
                     data.mata_pelajaran = 'Bimbingan Konseling';
                     data.no_hp = '';
                     
                     result = await registerUser(data, role);
                     
-                } else if (role === 'orangtua') {
+                    if (result && result.success) {
+                        alert('✅ Registrasi Guru berhasil! Silakan login.');
+                        registerModal.style.display = 'none';
+                        document.getElementById('email').value = data.email;
+                        document.getElementById('password').value = data.password;
+                        document.getElementById('role').value = 'guru';
+                    } else {
+                        alert('❌ Registrasi guru gagal: ' + (result?.error || 'Coba lagi'));
+                    }
+                    return;
+                }
+                
+                // === REGISTER ORANG TUA ===
+                else if (role === 'orangtua') {
                     data.id_orangtua = 'ORT' + Date.now().toString().slice(-6);
                     data.anak_nis = document.getElementById('regAnakNIS').value.trim();
                     data.anak_nama = document.getElementById('regAnakNama').value.trim();
                     data.no_hp = '';
                     
-                    // Validasi NIS
+                    // Validasi NIS Anak
                     if (!data.anak_nis) {
                         alert('⚠️ Mohon masukkan NIS anak!');
                         return;
                     }
                     
+                    if (!data.anak_nama) {
+                        alert('⚠️ Mohon masukkan nama anak!');
+                        return;
+                    }
+                    
+                    // ✅ PERBAIKAN: Panggil registerOrangTua
                     if (typeof registerOrangTua !== 'function') {
                         alert('❌ Fungsi registerOrangTua tidak ditemukan!');
                         return;
                     }
+                    
                     result = await registerOrangTua(data);
+                    
+                    // ✅ PERBAIKAN: Handle hasil dengan benar
+                    if (result && result.success === true) {
+                        alert('✅ Registrasi Orang Tua berhasil! Silakan login.');
+                        registerModal.style.display = 'none';
+                        document.getElementById('email').value = data.email;
+                        document.getElementById('password').value = data.password;
+                        document.getElementById('role').value = 'orangtua';
+                    } else if (result && result.error) {
+                        alert('❌ ' + result.error);
+                    } else {
+                        alert('❌ Registrasi Orang Tua gagal. Coba lagi.');
+                    }
+                    return;
                 }
 
-                // Handle hasil registrasi
+                // ============================================
+                // FALLBACK: Handle hasil registrasi umum
+                // ============================================
                 if (result && result.error) {
                     alert('❌ ' + result.error);
                     return;

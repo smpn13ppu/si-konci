@@ -224,94 +224,184 @@ async function registerUser(data, role) {
     }
 }
 // ============================================
-// REGISTER ORANG TUA - DENGAN PENDING NIS
+// REGISTER ORANG TUA - FIXED
 // ============================================
 async function registerOrangTua(data) {
     console.log('📝 Register Orang Tua:', data.email);
     
     const client = getSupabase();
-    if (!client) return null;
+    if (!client) {
+        return { success: false, error: 'Koneksi database gagal' };
+    }
     
     try {
-        // 1. Cek apakah NIS sudah terdaftar di tabel siswa
-        const { data: siswaExist, error: cekError } = await client
+        // ============================================
+        // 1. VALIDASI DATA
+        // ============================================
+        
+        if (!data.nama || data.nama.trim() === '') {
+            return { success: false, error: 'Nama wajib diisi!' };
+        }
+        
+        if (!data.email || data.email.trim() === '') {
+            return { success: false, error: 'Email wajib diisi!' };
+        }
+        
+        if (!data.password || data.password.length < 6) {
+            return { success: false, error: 'Password minimal 6 karakter!' };
+        }
+        
+        if (!data.anak_nis || data.anak_nis.trim() === '') {
+            return { success: false, error: 'NIS anak wajib diisi!' };
+        }
+        
+        if (!data.anak_nama || data.anak_nama.trim() === '') {
+            return { success: false, error: 'Nama anak wajib diisi!' };
+        }
+        
+        // ============================================
+        // 2. CEK EMAIL SUDAH TERDAFTAR
+        // ============================================
+        
+        const { data: existingEmail, error: emailError } = await client
+            .from('orangtua')
+            .select('email')
+            .eq('email', data.email)
+            .maybeSingle();
+        
+        if (emailError) {
+            console.error('❌ Cek Email error:', emailError);
+        }
+        
+        if (existingEmail) {
+            return { 
+                success: false, 
+                error: 'Email sudah terdaftar! Gunakan email yang lain.' 
+            };
+        }
+        
+        // ============================================
+        // 3. CEK NIS ANAK
+        // ============================================
+        
+        const { data: siswaData, error: siswaError } = await client
             .from('siswa')
             .select('nis, nama')
             .eq('nis', data.anak_nis)
             .maybeSingle();
         
-        // 2. Buat akun Auth
+        let anakTerhubung = false;
+        let anakNama = data.anak_nama;
+        
+        if (siswaData) {
+            // NIS ditemukan, langsung hubungkan
+            anakTerhubung = true;
+            anakNama = siswaData.nama || data.anak_nama;
+            console.log('✅ Siswa ditemukan:', siswaData.nama);
+        } else {
+            // NIS belum terdaftar, simpan ke pending
+            console.log('⏳ NIS belum terdaftar, simpan ke pending...');
+            
+            // Simpan ke tabel pending_siswa
+            const { error: pendingError } = await client
+                .from('pending_siswa')
+                .insert([{
+                    nis: data.anak_nis,
+                    nama_anak: data.anak_nama,
+                    orangtua_id: data.id_orangtua,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                }]);
+            
+            if (pendingError) {
+                console.error('❌ Error saving pending:', pendingError);
+                // Tidak perlu return error, lanjutkan registrasi
+            }
+        }
+        
+        // ============================================
+        // 4. BUAT AKUN AUTH
+        // ============================================
+        
         const { data: authData, error: authError } = await client.auth.signUp({
             email: data.email,
             password: data.password,
             options: {
                 data: { 
                     role: 'orangtua', 
-                    name: data.nama 
+                    name: data.nama,
+                    id_orangtua: data.id_orangtua
                 }
             }
         });
         
         if (authError) {
             console.error('❌ Auth error:', authError);
-            return null;
+            
+            if (authError.message.includes('already registered')) {
+                return { 
+                    success: false, 
+                    error: 'Email sudah terdaftar! Silakan login.' 
+                };
+            }
+            
+            return { 
+                success: false, 
+                error: 'Gagal membuat akun: ' + authError.message 
+            };
         }
         
-        // 3. Siapkan data orang tua
-        const orangtuaData = {
-            id_orangtua: data.id_orangtua || 'ORT' + Date.now().toString().slice(-6),
-            nama: data.nama,
-            anak_nis: data.anak_nis,
-            anak_nama: data.anak_nama,
-            no_hp: data.no_hp || '',
-            email: data.email,
+        if (!authData || !authData.user) {
+            return { 
+                success: false, 
+                error: 'Gagal membuat akun, silakan coba lagi.' 
+            };
+        }
+        
+        // ============================================
+        // 5. SIMPAN DATA ORANG TUA
+        // ============================================
+        
+        const ortuData = {
+            id_orangtua: data.id_orangtua,
+            nama: data.nama.trim(),
+            email: data.email.trim(),
             password: data.password,
+            no_hp: data.no_hp || '',
+            anak_nis: data.anak_nis.trim(),
+            anak_nama: anakNama,
+            anak_terhubung: anakTerhubung,
             user_id: authData.user.id,
-            anak_terhubung: !!siswaExist, // true jika siswa sudah ada
-            status: 'active'
+            created_at: new Date().toISOString()
         };
         
-        // 4. Simpan ke tabel orangtua
-        const { data: orangtuaResult, error: orangtuaError } = await client
+        const { data: ortuResult, error: ortuError } = await client
             .from('orangtua')
-            .insert([orangtuaData])
+            .insert([ortuData])
             .select()
             .single();
         
-        if (orangtuaError) {
-            console.error('❌ Insert orangtua error:', orangtuaError);
-            return null;
+        if (ortuError) {
+            console.error('❌ Insert orangtua error:', ortuError);
+            return { 
+                success: false, 
+                error: 'Gagal menyimpan data: ' + ortuError.message 
+            };
         }
         
-        // 5. Jika siswa BELUM terdaftar, simpan ke pending_siswa
-        if (!siswaExist) {
-            console.log('🔄 Siswa belum terdaftar, simpan ke pending...');
-            
-            const { error: pendingError } = await client
-                .from('pending_siswa')
-                .insert([{
-                    nis: data.anak_nis,
-                    nama: data.anak_nama,
-                    orangtua_id: orangtuaResult.id_orangtua,
-                    orangtua_nama: data.nama,
-                    status: 'pending'
-                }]);
-            
-            if (pendingError) {
-                console.error('❌ Insert pending error:', pendingError);
-                // Tidak perlu throw, karena orang tua sudah terdaftar
-            } else {
-                console.log('✅ NIS disimpan ke pending_siswa');
-            }
-        } else {
-            console.log('✅ Siswa sudah terdaftar, langsung terhubung');
-        }
-        
-        return orangtuaResult;
+        console.log('✅ Orang Tua registered successfully:', ortuResult);
+        return { 
+            success: true, 
+            data: ortuResult,
+            message: 'Registrasi berhasil! Silakan login.' 
+        };
         
     } catch (error) {
-        console.error('❌ Register error:', error);
-        return null;
+        console.error('❌ Register orangtua error:', error);
+        return { 
+            success: false, 
+            error: 'Terjadi kesalahan: ' + error.message 
+        };
     }
 }
 // ============================================
